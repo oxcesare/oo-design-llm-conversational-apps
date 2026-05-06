@@ -76,7 +76,7 @@ public class Llama3Strategy implements InteligenciaArtificialStrategy {
         // 2. Enviamos la petición real al modelo Llama3 instalado
         String jsonRespuesta = cliente.enviarPeticion("llama3", promptSeleccionado);
 
-        // TODO implementar la logica necesaria para encapsular el response mediante
+
         // Jackson (Json)
         return "Respuesta de Ollama: " + jsonRespuesta;
     }
