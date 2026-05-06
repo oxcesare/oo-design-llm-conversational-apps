@@ -5,7 +5,7 @@ import ux.com.edu.prompteng.implementation.builders.PromptBuilder;
 import ux.com.edu.prompteng.implementation.builders.PromptConfig;
 import ux.com.edu.prompteng.implementation.strategies.InteligenciaArtificialStrategy;
 
-public class Llama3StrategyImpl implements InteligenciaArtificialStrategy {
+public class Llama3Strategy implements InteligenciaArtificialStrategy {
 
     private final OllamaClient cliente = new OllamaClient();
 

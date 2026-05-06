@@ -5,13 +5,13 @@ import ux.com.edu.prompteng.implementation.builders.PromptBuilder;
 import ux.com.edu.prompteng.implementation.builders.PromptConfig;
 import ux.com.edu.prompteng.implementation.strategies.InteligenciaArtificialStrategy;
 
-public class Gemma2StrategyImpl implements InteligenciaArtificialStrategy {
+public class MistralStrategy implements InteligenciaArtificialStrategy {
 
-    private final OllamaClient cliente = new OllamaClient();
-
+    private OllamaClient  cliente = new OllamaClient();
 
     @Override
     public String generarRespuesta(PromptConfig config) {
+
         //Determinar el Prompt seleccionado
         String promptSeleccionado = "";
 
@@ -74,15 +74,15 @@ public class Gemma2StrategyImpl implements InteligenciaArtificialStrategy {
 
 
         // 2. Enviamos la petición real al modelo Llama3 instalado
-        String jsonRespuesta = cliente.enviarPeticion("gemma2:9b", promptSeleccionado);
+        String jsonRespuesta = cliente.enviarPeticion("mistral", promptSeleccionado);
 
 
         // Jackson (Json)
-        return "Respuesta de Gemma2:9b: " + jsonRespuesta;
+        return "Respuesta de Ollama: " + jsonRespuesta;
     }
 
     @Override
     public String getNombreModelo() {
-        return "gemma2";
+        return "mistral";
     }
 }
