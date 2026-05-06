@@ -2,7 +2,7 @@ package ux.com.edu.prompteng;
 
 
 import ux.com.edu.prompteng.context.AgenteConversacional;
-import ux.com.edu.prompteng.context.impl.Llama3Strategy;
+import ux.com.edu.prompteng.context.impl.Llama3StrategyImpl;
 import ux.com.edu.prompteng.implementation.builders.PromptConfig;
 import ux.com.edu.prompteng.intent.routing.IntentRouter;
 
@@ -51,7 +51,7 @@ public class Main {
                     listaEjemplos
             );
 
-            Llama3Strategy miLlama = new Llama3Strategy();
+            Llama3StrategyImpl miLlama = new Llama3StrategyImpl();
             miAgente.setModelo(miLlama);
 
             miAgente.interactuar(miPrompt);
