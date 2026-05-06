@@ -1,17 +1,67 @@
 package ux.com.edu.prompteng;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-public class Main {
-    public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
+import ux.com.edu.prompteng.context.AgenteConversacional;
+import ux.com.edu.prompteng.context.impl.Llama3Strategy;
+import ux.com.edu.prompteng.implementation.builders.PromptConfig;
+import ux.com.edu.prompteng.intent.routing.IntentRouter;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+public class Main {
+
+
+    public static void main(String[] args) {
+
+        AgenteConversacional miAgente = new AgenteConversacional();
+        IntentRouter router = new IntentRouter();
+
+        Scanner sc = new Scanner(System.in);
+
+        try {
+            // Lo que el usuario realmente quiere
+            String loQuePidioElUsuario = sc.nextLine();
+
+            // El Router hace su magia basada en el texto del usuario
+            String rolDetectado = router.determinarRol(loQuePidioElUsuario);
+            String instruccionesMejoradas = router.optimizarInstrucciones(loQuePidioElUsuario);
+            String tipoPrompt = router.determinarTipoPrompt(rolDetectado, instruccionesMejoradas);
+            List<String> listaEjemplos = new ArrayList<>();
+
+            if (tipoPrompt.equals("few-shot")) {
+                String agregarEjemplo;
+                do {
+                    System.out.println("¿Quieres agregar un ejemplo? (sí/no)");
+                    agregarEjemplo = sc.nextLine().trim().toLowerCase();
+                    if (agregarEjemplo.equals("si")) {
+                        System.out.println("Escribe el ejemplo:");
+                        String ejemplo = sc.nextLine();
+                        listaEjemplos.add(ejemplo);
+                    }
+                } while (agregarEjemplo.equals("sí") || agregarEjemplo.equals("si"));
+            }
+
+            PromptConfig miPrompt = new PromptConfig(
+                    rolDetectado,
+                    instruccionesMejoradas,
+                    "Explícamelo como experto en el área",
+                    tipoPrompt,
+                    listaEjemplos
+            );
+
+            Llama3Strategy miLlama = new Llama3Strategy();
+            miAgente.setModelo(miLlama);
+
+            miAgente.interactuar(miPrompt);
+
+        } catch (Exception e) {
+            System.out.println("Ocurrió un error al procesar la entrada: " + e.getMessage());
+        } finally {
+            sc.close();
         }
+
+
     }
 }
