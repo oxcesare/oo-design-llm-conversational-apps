@@ -91,6 +91,10 @@ public class IntentRouter {
             return instrucciones + " (Incluye referencias a juegos populares)";
         }
 
+        if(lower.contains("razona internamente") || lower.contains("internamente")) {
+            return instrucciones + " (Realiza un razonamiento interno paso a paso antes de responder)";
+        }
+
 
         return instrucciones;
     }
@@ -120,14 +124,8 @@ public class IntentRouter {
 
         String instruccionesLower = instruccionesOptimizadas.toLowerCase();
 
-        // Regla de negocio: prompts estructurados con formato objetivo se tratan como few-shot.
-        if (instruccionesLower.contains("ejemplo") ||
-                (instruccionesLower.contains("formato") && instruccionesLower.contains("consulta del usuario")) ||
-                instruccionesLower.contains("responde siempre con el siguiente formato") ||
-                instruccionesLower.contains("muestra cómo") ||
-                instruccionesLower.contains("casos de uso") ||
-                instruccionesLower.contains("siguiendo este formato")) {
-            return "few-shot";
+        if (esMetaPrompting(instruccionesLower)) {
+            return "meta-prompting";
         }
 
         if (instruccionesLower.contains("paso a paso") ||
@@ -137,12 +135,14 @@ public class IntentRouter {
             return "chain-of-thought";
         }
 
-        if (instruccionesLower.contains("genera un prompt") ||
-                instruccionesLower.contains("genera únicamente el prompt") ||
-                instruccionesLower.contains("genera unicamente el prompt") ||
-                instruccionesLower.contains("diseña una instrucción") ||
-                instruccionesLower.contains("optimiza este prompt")) {
-            return "meta-prompting";
+        // Regla de negocio: prompts estructurados con formato objetivo se tratan como few-shot.
+        if (instruccionesLower.contains("ejemplo") ||
+                (instruccionesLower.contains("formato") && instruccionesLower.contains("consulta del usuario")) ||
+                instruccionesLower.contains("responde siempre con el siguiente formato") ||
+                instruccionesLower.contains("muestra cómo") ||
+                instruccionesLower.contains("casos de uso") ||
+                instruccionesLower.contains("siguiendo este formato")) {
+            return "few-shot";
         }
 
         String rolNormalizado = rol == null ? "" : rol.trim().toLowerCase();
@@ -162,7 +162,8 @@ public class IntentRouter {
         }
 
         String lower = promptUsuario.toLowerCase();
-        return lower.contains("consulta del usuario")
+        return esMetaPrompting(lower)
+                || lower.contains("consulta del usuario")
                 || lower.contains("responde siempre con el siguiente formato")
                 || lower.contains("eres un")
                 || lower.contains("actúa como")
@@ -216,5 +217,21 @@ public class IntentRouter {
             return matcher.group(1).trim();
         }
         return "";
+    }
+
+    private boolean esMetaPrompting(String texto) {
+        return texto.contains("genera un prompt")
+                || texto.contains("generar un prompt")
+                || texto.contains("crear un prompt")
+                || texto.contains("crea un prompt")
+                || texto.contains("diseñar un prompt")
+                || texto.contains("disenar un prompt")
+                || texto.contains("diseña una instrucción")
+                || texto.contains("disena una instruccion")
+                || texto.contains("optimiza este prompt")
+                || texto.contains("genera únicamente el prompt")
+                || texto.contains("genera unicamente el prompt")
+                || texto.contains("prompt final")
+                || (texto.contains("prompt") && texto.contains("otro modelo"));
     }
 }
