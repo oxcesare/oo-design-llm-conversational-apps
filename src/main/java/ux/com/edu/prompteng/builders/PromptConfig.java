@@ -38,4 +38,19 @@ public class PromptConfig {
     public void setTipoPrompt(String tipoPrompt) {
         this.tipoPrompt = tipoPrompt;
     }
+
+
+    /***
+     * Metodo toString()
+     */
+    @Override
+    public String toString() {
+        return "PromptConfig{" +
+                "rol='" + rol + '\'' +
+                ", instrucciones='" + instrucciones + '\'' +
+                ", entrada='" + entrada + '\'' +
+                ", tipoPrompt='" + tipoPrompt + '\'' +
+                ", ejemplos=" + ejemplos +
+                '}';
+    }
 }
