@@ -3,7 +3,7 @@ package ux.com.edu.prompteng;
 
 import ux.com.edu.prompteng.context.AgenteConversacional;
 import ux.com.edu.prompteng.context.impl.Llama3Strategy;
-import ux.com.edu.prompteng.implementation.builders.PromptConfig;
+import ux.com.edu.prompteng.builders.PromptConfig;
 import ux.com.edu.prompteng.intent.routing.IntentRouter;
 
 import java.util.ArrayList;

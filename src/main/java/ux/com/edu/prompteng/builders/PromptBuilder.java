@@ -1,4 +1,4 @@
-package ux.com.edu.prompteng.implementation.builders;
+package ux.com.edu.prompteng.builders;
 
 import java.util.ArrayList;
 import java.util.List;

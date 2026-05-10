@@ -1,9 +1,9 @@
 package ux.com.edu.prompteng.context.impl;
 
 import ux.com.edu.prompteng.client.OllamaClient;
-import ux.com.edu.prompteng.implementation.builders.PromptBuilder;
-import ux.com.edu.prompteng.implementation.builders.PromptConfig;
-import ux.com.edu.prompteng.implementation.strategies.InteligenciaArtificialStrategy;
+import ux.com.edu.prompteng.builders.PromptBuilder;
+import ux.com.edu.prompteng.builders.PromptConfig;
+import ux.com.edu.prompteng.strategies.InteligenciaArtificialStrategy;
 
 public class MistralStrategy implements InteligenciaArtificialStrategy {
 

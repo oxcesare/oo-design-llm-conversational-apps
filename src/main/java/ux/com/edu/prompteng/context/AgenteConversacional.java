@@ -2,8 +2,8 @@ package ux.com.edu.prompteng.context;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ux.com.edu.prompteng.implementation.builders.PromptConfig;
-import ux.com.edu.prompteng.implementation.strategies.InteligenciaArtificialStrategy;
+import ux.com.edu.prompteng.builders.PromptConfig;
+import ux.com.edu.prompteng.strategies.InteligenciaArtificialStrategy;
 
 public class AgenteConversacional {
 
