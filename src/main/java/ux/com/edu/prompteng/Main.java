@@ -1,7 +1,10 @@
 package ux.com.edu.prompteng;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ux.com.edu.prompteng.builders.PromptConfig;
+import ux.com.edu.prompteng.client.OllamaClient;
 import ux.com.edu.prompteng.context.AgenteConversacional;
 import ux.com.edu.prompteng.context.impl.Gemma2Strategy;
 import ux.com.edu.prompteng.context.impl.Llama3Strategy;
@@ -15,9 +18,10 @@ import java.util.Scanner;
 
 public class Main {
 
+
+    private static final Logger log = LoggerFactory.getLogger(Main.class);
+
     private static final String ROL_POR_DEFECTO = "Asistente Virtual General";
-
-
 
     public static void main(String[] args) {
 
@@ -38,7 +42,7 @@ public class Main {
 
             String rolDetectado = esEstructurado ? router.determinarRol(promptUsuario) : ROL_POR_DEFECTO;
             String instruccionesMejoradas = esEstructurado ? router.optimizarInstrucciones(promptUsuario) : promptUsuario;
-            String tipoPrompt = esEstructurado ? router.determinarTipoPrompt(rolDetectado, instruccionesMejoradas) : "zero-shot";
+            String tipoPrompt = router.determinarTipoPrompt(rolDetectado, instruccionesMejoradas);
             String loQuePidioElUsuario = esEstructurado ? router.extraerConsultaFinal(promptUsuario) : promptUsuario;
             List<String[]> listaEjemplos = esEstructurado ? router.extraerEjemplosFewShot(promptUsuario) : new ArrayList<>();
 
@@ -50,9 +54,11 @@ public class Main {
                     listaEjemplos
             );
 
+
+            log.info("Promtp Construido" + " " +  tipoPrompt);
             miAgente.interactuar(miPrompt);
         } catch (Exception e) {
-            System.out.println("Ocurrió un error al procesar la entrada: " + e.getMessage());
+            log.error("Ocurrió un error al procesar la entrada: " + e.getMessage());
         }
     }
 
