@@ -1,5 +1,10 @@
 package ux.com.edu.prompteng.intent.routing;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Enrutador de intenciones del usuario.
  *
@@ -13,6 +18,15 @@ package ux.com.edu.prompteng.intent.routing;
  */
 public class IntentRouter {
 
+    private static final String ROL_POR_DEFECTO = "Asistente Virtual General";
+    private static final Pattern PATRON_ROL_EXPLICITO = Pattern.compile(
+            "(?i)(?:^|\\n)\\s*(?:eres\\s+un(?:a)?|actua\\s+como|actua\\s+como|actúa\\s+como|asume\\s+el\\s+rol\\s+de)\\s+([^\\n.]+)"
+    );
+    private static final Pattern PATRON_CONSULTA = Pattern.compile("(?is)consulta\\s+del\\s+usuario\\s*:\\s*(.+)$");
+    private static final Pattern PATRON_EJEMPLOS = Pattern.compile(
+            "(?is)(?:<ejemplo>\\s*)?entrada:\\s*(.+?)\\s*salida:\\s*(.+?)(?:\\s*</ejemplo>|(?=\\n\\s*entrada:)|$)"
+    );
+
     /**
      * Analiza las instrucciones del usuario y determina el rol más adecuado
      * para responder su solicitud.
@@ -21,6 +35,15 @@ public class IntentRouter {
      * @return el nombre del rol asignado según las palabras clave detectadas
      */
     public String determinarRol(String instruccionesUsuario) {
+        if (instruccionesUsuario == null || instruccionesUsuario.isBlank()) {
+            return ROL_POR_DEFECTO;
+        }
+
+        String rolExplicito = extraerRolExplicito(instruccionesUsuario);
+        if (!rolExplicito.isBlank()) {
+            return rolExplicito;
+        }
+
         String input = instruccionesUsuario.toLowerCase();
 
         if (input.contains("clima") || input.contains("tiempo")) {
@@ -33,7 +56,7 @@ public class IntentRouter {
             return "Profesor de Inteligencia Artificial";
         }
 
-        return "Asistente Virtual General";
+        return ROL_POR_DEFECTO;
     }
 
     /**
@@ -44,17 +67,27 @@ public class IntentRouter {
      * @return las instrucciones enriquecidas con directrices adicionales de formato
      */
     public String optimizarInstrucciones(String instrucciones) {
+        if (instrucciones == null || instrucciones.isBlank()) {
+            return "";
+        }
+
+        String lower = instrucciones.toLowerCase();
+
+        if (lower.contains("formato exacto") || lower.contains("responde siempre con el siguiente formato")) {
+            return instrucciones + " (Respeta el formato de salida exactamente como se indica).";
+        }
+
         // Si es clima, le agregamos que use un formato específico
-        if (instrucciones.toLowerCase().contains("clima")) {
+        if (lower.contains("clima")) {
             return instrucciones + " (Responde solo con la temperatura y condición)";
         }
         // si es sobre Inteligencia artificial
-        if (instrucciones.toLowerCase().contains("inteligencia artificial") || instrucciones.toLowerCase().contains("ia")) {
+        if (lower.contains("inteligencia artificial") || lower.contains("ia")) {
             return instrucciones + " (Explica con ejemplos y analogías)";
         }
 
         // si es sobre videojuegos
-        if (instrucciones.toLowerCase().contains("videojuegos") || instrucciones.toLowerCase().contains("gaming")) {
+        if (lower.contains("videojuegos") || lower.contains("gaming")) {
             return instrucciones + " (Incluye referencias a juegos populares)";
         }
 
@@ -81,9 +114,16 @@ public class IntentRouter {
      */
     public String determinarTipoPrompt(String rol, String instruccionesOptimizadas) {
 
+        if (instruccionesOptimizadas == null || instruccionesOptimizadas.isBlank()) {
+            return "zero-shot";
+        }
+
         String instruccionesLower = instruccionesOptimizadas.toLowerCase();
 
+        // Regla de negocio: prompts estructurados con formato objetivo se tratan como few-shot.
         if (instruccionesLower.contains("ejemplo") ||
+                (instruccionesLower.contains("formato") && instruccionesLower.contains("consulta del usuario")) ||
+                instruccionesLower.contains("responde siempre con el siguiente formato") ||
                 instruccionesLower.contains("muestra cómo") ||
                 instruccionesLower.contains("casos de uso") ||
                 instruccionesLower.contains("siguiendo este formato")) {
@@ -98,6 +138,8 @@ public class IntentRouter {
         }
 
         if (instruccionesLower.contains("genera un prompt") ||
+                instruccionesLower.contains("genera únicamente el prompt") ||
+                instruccionesLower.contains("genera unicamente el prompt") ||
                 instruccionesLower.contains("diseña una instrucción") ||
                 instruccionesLower.contains("optimiza este prompt")) {
             return "meta-prompting";
@@ -112,5 +154,67 @@ public class IntentRouter {
 
 
         return "zero-shot";
+    }
+
+    public boolean esPromptEstructurado(String promptUsuario) {
+        if (promptUsuario == null || promptUsuario.isBlank()) {
+            return false;
+        }
+
+        String lower = promptUsuario.toLowerCase();
+        return lower.contains("consulta del usuario")
+                || lower.contains("responde siempre con el siguiente formato")
+                || lower.contains("eres un")
+                || lower.contains("actúa como")
+                || lower.contains("actua como")
+                || lower.contains("asume el rol de");
+    }
+
+    public String extraerConsultaFinal(String promptUsuario) {
+        if (promptUsuario == null || promptUsuario.isBlank()) {
+            return "";
+        }
+
+        Matcher matcher = PATRON_CONSULTA.matcher(promptUsuario);
+        if (!matcher.find()) {
+            return promptUsuario.trim();
+        }
+
+        String bloqueConsulta = matcher.group(1).trim();
+        String[] lineas = bloqueConsulta.split("\\R");
+        for (String linea : lineas) {
+            String candidata = linea.trim();
+            if (!candidata.isEmpty()) {
+                return candidata;
+            }
+        }
+
+        return promptUsuario.trim();
+    }
+
+    public List<String[]> extraerEjemplosFewShot(String promptUsuario) {
+        List<String[]> ejemplos = new ArrayList<>();
+        if (promptUsuario == null || promptUsuario.isBlank()) {
+            return ejemplos;
+        }
+
+        Matcher matcher = PATRON_EJEMPLOS.matcher(promptUsuario);
+        while (matcher.find()) {
+            String entrada = matcher.group(1) == null ? "" : matcher.group(1).trim();
+            String salida = matcher.group(2) == null ? "" : matcher.group(2).trim();
+            if (!entrada.isEmpty() && !salida.isEmpty()) {
+                ejemplos.add(new String[]{entrada, salida});
+            }
+        }
+
+        return ejemplos;
+    }
+
+    private String extraerRolExplicito(String instruccionesUsuario) {
+        Matcher matcher = PATRON_ROL_EXPLICITO.matcher(instruccionesUsuario);
+        if (matcher.find()) {
+            return matcher.group(1).trim();
+        }
+        return "";
     }
 }
