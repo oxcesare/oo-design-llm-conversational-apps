@@ -63,6 +63,14 @@ public class Llama3Strategy implements InteligenciaArtificialStrategy {
                         .conEntrada(config.getEntrada())
                         .build();
                 break;
+
+            case "delimiters":
+                promptSeleccionado = new PromptBuilder()
+                        .conRol(config.getRol())
+                        .conInstrucciones(config.getInstrucciones())
+                        .conEntrada(config.getEntrada())
+                        .buildConDelimitadores(config.getContratoSalida());
+                break;
             default:
                 // Si no se especifica un tipo válido, usamos zero-shot por defecto
                 promptSeleccionado = new PromptBuilder()

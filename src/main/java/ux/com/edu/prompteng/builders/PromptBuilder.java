@@ -53,6 +53,30 @@ public class PromptBuilder {
         return sb.toString();
     }
 
+    // Método para Prompting con Delimitadores — construye el prompt usando las etiquetas XML definidas en PromptConstants
+    public String buildConDelimitadores(String contratoSalida) {
+        return PromptConstants.OPEN_SYSTEM + "\n"
+                + "    " + PromptConstants.OPEN_ROLE + rol + PromptConstants.CLOSE_ROLE + "\n"
+                + "    " + PromptConstants.OPEN_TASK + "\n"
+                + "        " + instrucciones + "\n"
+                + "    " + PromptConstants.CLOSE_TASK + "\n"
+                + PromptConstants.CLOSE_SYSTEM + "\n\n"
+                + PromptConstants.OPEN_OUTPUT_CONTRACT + "\n"
+                + "    " + (contratoSalida == null || contratoSalida.isBlank() ? "" : contratoSalida) + "\n"
+                + PromptConstants.CLOSE_OUTPUT_CONTRACT + "\n\n"
+                + PromptConstants.OPEN_USER + "\n"
+                + "    " + entradaUsuario + "\n"
+                + PromptConstants.CLOSE_USER;
+    }
+
+    //Metodo estático para Prompting con Delimitadores
+    public static PromptBuilder promptConDelimitadores(String rol, String instrucciones, String entradaUsuario) {
+        return new PromptBuilder()
+                .conRol(rol)
+                .conInstrucciones(instrucciones)
+                .conEntrada(entradaUsuario);
+    }
+
     // Método para zero-shot (sin ejemplos)
     public static PromptBuilder zeroShot(String rol, String instrucciones, String entradaUsuario) {
         return new PromptBuilder()

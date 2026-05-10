@@ -7,6 +7,7 @@ public class PromptConfig {
 
     private String rol;
     private String instrucciones;
+    private String contratoSalida;
     private String entrada;
     private String tipoPrompt;
     private List<String[]> ejemplos;
@@ -15,10 +16,15 @@ public class PromptConfig {
     public PromptConfig(String rol, String instrucciones, String entrada, String tipoPrompt, List<String[]> ejemplos) {
         this.rol = rol;
         this.instrucciones = instrucciones;
+        this.contratoSalida = "";
         this.entrada = entrada;
         this.tipoPrompt = tipoPrompt;
         this.ejemplos = ejemplos == null ? new ArrayList<>() : new ArrayList<>(ejemplos);
     }
+
+    public String getContratoSalida() { return contratoSalida == null ? "" : contratoSalida; }
+
+    public void setContratoSalida(String contratoSalida) { this.contratoSalida = contratoSalida; }
 
     public List<String[]> getEjemplos() {
         return ejemplos;

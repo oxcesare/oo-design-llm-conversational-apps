@@ -20,12 +20,17 @@ public class IntentRouter {
 
     private static final String ROL_POR_DEFECTO = "Asistente Virtual General";
     private static final Pattern PATRON_ROL_EXPLICITO = Pattern.compile(
-            "(?i)(?:^|\\n)\\s*(?:eres\\s+un(?:a)?|actua\\s+como|actua\\s+como|actúa\\s+como|asume\\s+el\\s+rol\\s+de)\\s+([^\\n.]+)"
+            "(?i)(?:^|\\n)\\s*(?:eres\\s+una?|actua\\s+como|actúa\\s+como|asume\\s+el\\s+rol\\s+de)\\s+([^\\n.]+)"
     );
     private static final Pattern PATRON_CONSULTA = Pattern.compile("(?is)consulta\\s+del\\s+usuario\\s*:\\s*(.+)$");
     private static final Pattern PATRON_EJEMPLOS = Pattern.compile(
-            "(?is)(?:<ejemplo>\\s*)?entrada:\\s*(.+?)\\s*salida:\\s*(.+?)(?:\\s*</ejemplo>|(?=\\n\\s*entrada:)|$)"
+            "(?is)<ejemplo>\\s*entrada:\\s*(.+?)\\s*salida:\\s*(.+?)\\s*</ejemplo>"
     );
+    // Patrones para extraer campos de prompts con delimitadores XML
+    private static final Pattern PATRON_TAG_ROLE      = Pattern.compile("(?is)<role>(.*?)</role>");
+    private static final Pattern PATRON_TAG_TASK      = Pattern.compile("(?is)<task_description>(.*?)</task_description>");
+    private static final Pattern PATRON_TAG_OUTPUT    = Pattern.compile("(?is)<output_contract>(.*?)</output_contract>");
+    private static final Pattern PATRON_TAG_USER      = Pattern.compile("(?is)<user_query>(.*?)</user_query>");
 
     /**
      * Analiza las instrucciones del usuario y determina el rol más adecuado
@@ -103,14 +108,15 @@ public class IntentRouter {
      * Determina el tipo de prompt más adecuado a partir del rol asignado
      * y las instrucciones ya optimizadas.
      *
-     * <p>Los tipos de prompt soportados son:</p>
-     * <ul>
-     *   <li><b>few-shot</b>: cuando se detectan ejemplos o casos de uso.</li>
-     *   <li><b>chain-of-thought</b>: cuando se requiere razonamiento paso a paso.</li>
-     *   <li><b>meta-prompting</b>: cuando la solicitud es generar o mejorar un prompt.</li>
-     *   <li><b>role-based</b>: cuando se ha asignado un rol específico al modelo.</li>
-     *   <li><b>zero-shot</b>: caso por defecto sin ejemplos ni rol especializado.</li>
-     * </ul>
+     * <p>Prioridad de clasificación:</p>
+     * <ol>
+     *   <li><b>delimiters</b>: etiquetas XML estructuradas.</li>
+     *   <li><b>meta-prompting</b>: generar o mejorar un prompt.</li>
+     *   <li><b>chain-of-thought</b>: razonamiento paso a paso.</li>
+     *   <li><b>few-shot</b>: ejemplos o formato objetivo.</li>
+     *   <li><b>role-based</b>: rol explícito.</li>
+     *   <li><b>zero-shot</b>: caso por defecto.</li>
+     * </ol>
      *
      * @param rol                      el rol determinado previamente por {@link #determinarRol(String)}
      * @param instruccionesOptimizadas las instrucciones procesadas por {@link #optimizarInstrucciones(String)}
@@ -122,20 +128,24 @@ public class IntentRouter {
             return "zero-shot";
         }
 
+        // 1ª prioridad: delimitadores XML estructurados
+        if (esDelimitadores(instruccionesOptimizadas)) {
+            return "delimiters";
+        }
+
         String instruccionesLower = instruccionesOptimizadas.toLowerCase();
 
+        // 2ª prioridad: meta-prompting
         if (esMetaPrompting(instruccionesLower)) {
             return "meta-prompting";
         }
 
-        if (instruccionesLower.contains("paso a paso") ||
-                instruccionesLower.contains("razona") ||
-                instruccionesLower.contains("pensemos") ||
-                instruccionesLower.contains("desglosa")) {
+        // 3ª prioridad: chain-of-thought
+        if (esChainOfThought(instruccionesLower)) {
             return "chain-of-thought";
         }
 
-        // Regla de negocio: prompts estructurados con formato objetivo se tratan como few-shot.
+        // 4ª prioridad: few-shot — prompts estructurados con formato objetivo
         if (instruccionesLower.contains("ejemplo") ||
                 (instruccionesLower.contains("formato") && instruccionesLower.contains("consulta del usuario")) ||
                 instruccionesLower.contains("responde siempre con el siguiente formato") ||
@@ -145,6 +155,7 @@ public class IntentRouter {
             return "few-shot";
         }
 
+        // 5ª prioridad: role-based
         String rolNormalizado = rol == null ? "" : rol.trim().toLowerCase();
         if ((!rolNormalizado.isEmpty() && !rolNormalizado.equals("asistente virtual general"))
                 || instruccionesLower.contains("actúa como")
@@ -152,8 +163,16 @@ public class IntentRouter {
             return "role-based";
         }
 
-
         return "zero-shot";
+    }
+
+    public boolean esDelimitadores(String promptUsuario) {
+        if (promptUsuario == null || promptUsuario.isBlank()) return false;
+        String lower = promptUsuario.toLowerCase();
+        return lower.contains("<system_context>")
+                && lower.contains("<role>")
+                && lower.contains("<task_description>")
+                && lower.contains("<user_query>");
     }
 
     public boolean esPromptEstructurado(String promptUsuario) {
@@ -162,7 +181,8 @@ public class IntentRouter {
         }
 
         String lower = promptUsuario.toLowerCase();
-        return esMetaPrompting(lower)
+        return esDelimitadores(promptUsuario)
+                || esMetaPrompting(lower)
                 || lower.contains("consulta del usuario")
                 || lower.contains("responde siempre con el siguiente formato")
                 || lower.contains("eres un")
@@ -171,9 +191,30 @@ public class IntentRouter {
                 || lower.contains("asume el rol de");
     }
 
+    public String extraerRolDeDelimitadores(String prompt) {
+        return extraerEntreTags(PATRON_TAG_ROLE, prompt);
+    }
+
+    public String extraerInstruccionesDeDelimitadores(String prompt) {
+        return extraerEntreTags(PATRON_TAG_TASK, prompt);
+    }
+
+    public String extraerContratoSalidaDeDelimitadores(String prompt) {
+        return extraerEntreTags(PATRON_TAG_OUTPUT, prompt);
+    }
+
+    public String extraerConsultaDeDelimitadores(String prompt) {
+        return extraerEntreTags(PATRON_TAG_USER, prompt);
+    }
+
     public String extraerConsultaFinal(String promptUsuario) {
         if (promptUsuario == null || promptUsuario.isBlank()) {
             return "";
+        }
+
+        // Si es delimitado, usar tag <user_query>
+        if (esDelimitadores(promptUsuario)) {
+            return extraerConsultaDeDelimitadores(promptUsuario);
         }
 
         Matcher matcher = PATRON_CONSULTA.matcher(promptUsuario);
@@ -202,7 +243,7 @@ public class IntentRouter {
         Matcher matcher = PATRON_EJEMPLOS.matcher(promptUsuario);
         while (matcher.find()) {
             String entrada = matcher.group(1) == null ? "" : matcher.group(1).trim();
-            String salida = matcher.group(2) == null ? "" : matcher.group(2).trim();
+            String salida  = matcher.group(2) == null ? "" : matcher.group(2).trim();
             if (!entrada.isEmpty() && !salida.isEmpty()) {
                 ejemplos.add(new String[]{entrada, salida});
             }
@@ -211,12 +252,29 @@ public class IntentRouter {
         return ejemplos;
     }
 
+    private String extraerEntreTags(Pattern patron, String texto) {
+        if (texto == null || texto.isBlank()) return "";
+        Matcher matcher = patron.matcher(texto);
+        return matcher.find() ? matcher.group(1).trim() : "";
+    }
+
     private String extraerRolExplicito(String instruccionesUsuario) {
         Matcher matcher = PATRON_ROL_EXPLICITO.matcher(instruccionesUsuario);
         if (matcher.find()) {
             return matcher.group(1).trim();
         }
         return "";
+    }
+
+    private boolean esChainOfThought(String textoLower) {
+        return textoLower.contains("paso a paso")
+                || textoLower.contains("razona internamente")
+                || textoLower.contains("razona")
+                || textoLower.contains("piensa paso a paso")
+                || textoLower.contains("pensemos")
+                || textoLower.contains("desglosa")
+                || textoLower.contains("no muestres tu razonamiento")
+                || textoLower.contains("siguiendo este procedimiento");
     }
 
     private boolean esMetaPrompting(String texto) {
@@ -235,3 +293,4 @@ public class IntentRouter {
                 || (texto.contains("prompt") && texto.contains("otro modelo"));
     }
 }
+
