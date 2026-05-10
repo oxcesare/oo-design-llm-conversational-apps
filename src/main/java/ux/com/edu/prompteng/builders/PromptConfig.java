@@ -12,12 +12,12 @@ public class PromptConfig {
     private List<String[]> ejemplos;
 
 
-    public PromptConfig(String rol, String instrucciones, String entrada,String tipoPrompt, List<String> ejemplos) {
+    public PromptConfig(String rol, String instrucciones, String entrada, String tipoPrompt, List<String[]> ejemplos) {
         this.rol = rol;
         this.instrucciones = instrucciones;
         this.entrada = entrada;
         this.tipoPrompt = tipoPrompt;
-        this.ejemplos= new ArrayList<String[]>();
+        this.ejemplos = ejemplos == null ? new ArrayList<>() : new ArrayList<>(ejemplos);
     }
 
     public List<String[]> getEjemplos() {
