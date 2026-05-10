@@ -25,7 +25,9 @@ public class PromptBuilder {
     }
 
     public PromptBuilder agregarEjemplo(String entrada, String salida) {
-        this.ejemplos.add(String.format("<ejemplo>\nEntrada: %s\nSalida: %s\n</ejemplo>", entrada, salida));
+        this.ejemplos.add(
+                String.format("<ejemplo>%nEntrada: %s%nSalida: %s%n</ejemplo>", entrada, salida)
+        );
         return this;
     }
 

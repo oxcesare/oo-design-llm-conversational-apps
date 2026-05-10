@@ -1,5 +1,8 @@
 package ux.com.edu.prompteng.client;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -7,6 +10,8 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 
 public class OllamaClient {
+
+    private static final Logger log = LoggerFactory.getLogger(OllamaClient.class);
 
     private static final String URL_API = "http://localhost:11434/api/generate";
 
@@ -33,8 +38,12 @@ public class OllamaClient {
 
             return response.body(); // Aquí recibes el JSON completo de Ollama
 
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("La solicitud fue interrumpida: {}", e.getMessage());
         } catch (Exception e) {
-            return "Error de conexión: " + e.getMessage();
+            return e.getMessage();
         }
+        return null;
     }
 }

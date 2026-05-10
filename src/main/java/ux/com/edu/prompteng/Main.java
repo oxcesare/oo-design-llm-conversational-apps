@@ -22,6 +22,7 @@ public class Main {
 
         try {
             // Lo que el usuario realmente quiere
+            System.out.println("Ingresa tu pregunta:");
             String loQuePidioElUsuario = sc.nextLine();
 
             // El Router hace su magia basada en el texto del usuario
