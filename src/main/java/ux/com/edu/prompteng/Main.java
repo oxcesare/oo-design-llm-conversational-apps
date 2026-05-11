@@ -4,11 +4,8 @@ package ux.com.edu.prompteng;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ux.com.edu.prompteng.builders.PromptConfig;
-import ux.com.edu.prompteng.client.OllamaClient;
 import ux.com.edu.prompteng.context.AgenteConversacional;
-import ux.com.edu.prompteng.context.impl.Gemma2Strategy;
-import ux.com.edu.prompteng.context.impl.Llama3Strategy;
-import ux.com.edu.prompteng.context.impl.MistralStrategy;
+import ux.com.edu.prompteng.context.impl.ModeloStrategy;
 import ux.com.edu.prompteng.intent.routing.IntentRouter;
 import ux.com.edu.prompteng.strategies.InteligenciaArtificialStrategy;
 
@@ -95,13 +92,13 @@ public class Main {
 
             switch (opcion) {
                 case "1", "llama3" -> {
-                    return new Llama3Strategy();
+                    return new ModeloStrategy("llama3", "Llama3-Local-M4");
                 }
                 case "2", "mistral" -> {
-                    return new MistralStrategy();
+                    return new ModeloStrategy("mistral", "mistral");
                 }
                 case "3", "gemma2" -> {
-                    return new Gemma2Strategy();
+                    return new ModeloStrategy("gemma2:9b", "gemma2");
                 }
                 default -> System.out.println("Opción inválida. Escribe 1, 2 o 3.");
             }
