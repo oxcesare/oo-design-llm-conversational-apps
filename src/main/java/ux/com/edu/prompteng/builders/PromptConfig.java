@@ -9,11 +9,11 @@ public class PromptConfig {
     private String instrucciones;
     private String contratoSalida;
     private String entrada;
-    private String tipoPrompt;
+    private TipoPrompt tipoPrompt;
     private List<String[]> ejemplos;
 
 
-    public PromptConfig(String rol, String instrucciones, String entrada, String tipoPrompt, List<String[]> ejemplos) {
+    public PromptConfig(String rol, String instrucciones, String entrada, TipoPrompt tipoPrompt, List<String[]> ejemplos) {
         this.rol = rol;
         this.instrucciones = instrucciones;
         this.contratoSalida = "";
@@ -39,9 +39,9 @@ public class PromptConfig {
     public String getInstrucciones() { return instrucciones; }
     public String getEntrada() { return entrada; }
 
-    public String getTipoPrompt() { return tipoPrompt; }
+    public TipoPrompt getTipoPrompt() { return tipoPrompt; }
 
-    public void setTipoPrompt(String tipoPrompt) {
+    public void setTipoPrompt(TipoPrompt tipoPrompt) {
         this.tipoPrompt = tipoPrompt;
     }
 
@@ -55,8 +55,10 @@ public class PromptConfig {
                 "rol='" + rol + '\'' +
                 ", instrucciones='" + instrucciones + '\'' +
                 ", entrada='" + entrada + '\'' +
-                ", tipoPrompt='" + tipoPrompt + '\'' +
+                ", tipoPrompt=" + tipoPrompt +
                 ", ejemplos=" + ejemplos +
                 '}';
     }
 }
+
+

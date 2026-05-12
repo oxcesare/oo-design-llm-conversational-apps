@@ -4,6 +4,7 @@ package ux.com.edu.prompteng;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ux.com.edu.prompteng.builders.PromptConfig;
+import ux.com.edu.prompteng.builders.TipoPrompt;
 import ux.com.edu.prompteng.context.AgenteConversacional;
 import ux.com.edu.prompteng.context.impl.ModeloStrategy;
 import ux.com.edu.prompteng.intent.routing.IntentRouter;
@@ -37,7 +38,7 @@ public class Main {
 
             String rolDetectado;
             String instruccionesMejoradas;
-            String tipoPrompt;
+            TipoPrompt tipoPrompt;
             String loQuePidioElUsuario;
             List<String[]> listaEjemplos = new ArrayList<>();
 
@@ -46,7 +47,7 @@ public class Main {
                 rolDetectado          = router.extraerRolDeDelimitadores(promptUsuario);
                 instruccionesMejoradas = router.extraerInstruccionesDeDelimitadores(promptUsuario);
                 loQuePidioElUsuario   = router.extraerConsultaDeDelimitadores(promptUsuario);
-                tipoPrompt            = "delimiters";
+                tipoPrompt            = TipoPrompt.DELIMITERS;
             } else if (router.esPromptEstructurado(promptUsuario)) {
                 // Prompt estructurado en texto libre
                 rolDetectado          = router.determinarRol(promptUsuario);
@@ -58,7 +59,7 @@ public class Main {
                 // Pregunta genérica sin estructura
                 rolDetectado          = ROL_POR_DEFECTO;
                 instruccionesMejoradas = promptUsuario;
-                tipoPrompt            = "zero-shot";
+                tipoPrompt            = TipoPrompt.ZERO_SHOT;
                 loQuePidioElUsuario   = promptUsuario;
             }
 
@@ -71,11 +72,11 @@ public class Main {
             );
 
             // Para el tipo delimiters, extraer y guardar el contrato de salida
-            if ("delimiters".equals(tipoPrompt)) {
+            if (TipoPrompt.DELIMITERS == tipoPrompt) {
                 miPrompt.setContratoSalida(router.extraerContratoSalidaDeDelimitadores(promptUsuario));
             }
 
-            log.info("Promtp Construido" + " " +  tipoPrompt);
+            log.info("Prompt Construido: {}", tipoPrompt);
             //miAgente.interactuar(miPrompt);
         } catch (Exception e) {
             log.error("Ocurrió un error al procesar la entrada: " + e.getMessage());

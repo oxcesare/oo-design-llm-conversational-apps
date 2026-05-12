@@ -1,5 +1,6 @@
 package ux.com.edu.prompteng.intent.routing;
 
+import ux.com.edu.prompteng.builders.TipoPrompt;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -110,39 +111,39 @@ public class IntentRouter {
      *
      * <p>Prioridad de clasificación:</p>
      * <ol>
-     *   <li><b>delimiters</b>: etiquetas XML estructuradas.</li>
-     *   <li><b>meta-prompting</b>: generar o mejorar un prompt.</li>
-     *   <li><b>chain-of-thought</b>: razonamiento paso a paso.</li>
-     *   <li><b>few-shot</b>: ejemplos o formato objetivo.</li>
-     *   <li><b>role-based</b>: rol explícito.</li>
-     *   <li><b>zero-shot</b>: caso por defecto.</li>
+     *   <li><b>DELIMITERS</b>: etiquetas XML estructuradas.</li>
+     *   <li><b>META_PROMPTING</b>: generar o mejorar un prompt.</li>
+     *   <li><b>CHAIN_OF_THOUGHT</b>: razonamiento paso a paso.</li>
+     *   <li><b>FEW_SHOT</b>: ejemplos o formato objetivo.</li>
+     *   <li><b>ROLE_BASED</b>: rol explícito.</li>
+     *   <li><b>ZERO_SHOT</b>: caso por defecto.</li>
      * </ol>
      *
      * @param rol                      el rol determinado previamente por {@link #determinarRol(String)}
      * @param instruccionesOptimizadas las instrucciones procesadas por {@link #optimizarInstrucciones(String)}
-     * @return una cadena con el tipo de prompt seleccionado
+     * @return TipoPrompt con el tipo de prompt seleccionado
      */
-    public String determinarTipoPrompt(String rol, String instruccionesOptimizadas) {
+    public TipoPrompt determinarTipoPrompt(String rol, String instruccionesOptimizadas) {
 
         if (instruccionesOptimizadas == null || instruccionesOptimizadas.isBlank()) {
-            return "zero-shot";
+            return TipoPrompt.ZERO_SHOT;
         }
 
         // 1ª prioridad: delimitadores XML estructurados
         if (esDelimitadores(instruccionesOptimizadas)) {
-            return "delimiters";
+            return TipoPrompt.DELIMITERS;
         }
 
         String instruccionesLower = instruccionesOptimizadas.toLowerCase();
 
         // 2ª prioridad: meta-prompting
         if (esMetaPrompting(instruccionesLower)) {
-            return "meta-prompting";
+            return TipoPrompt.META_PROMPTING;
         }
 
         // 3ª prioridad: chain-of-thought
         if (esChainOfThought(instruccionesLower)) {
-            return "chain-of-thought";
+            return TipoPrompt.CHAIN_OF_THOUGHT;
         }
 
         // 4ª prioridad: few-shot — prompts estructurados con formato objetivo
@@ -152,7 +153,7 @@ public class IntentRouter {
                 instruccionesLower.contains("muestra cómo") ||
                 instruccionesLower.contains("casos de uso") ||
                 instruccionesLower.contains("siguiendo este formato")) {
-            return "few-shot";
+            return TipoPrompt.FEW_SHOT;
         }
 
         // 5ª prioridad: role-based
@@ -160,10 +161,10 @@ public class IntentRouter {
         if ((!rolNormalizado.isEmpty() && !rolNormalizado.equals("asistente virtual general"))
                 || instruccionesLower.contains("actúa como")
                 || instruccionesLower.contains("asume el rol de")) {
-            return "role-based";
+            return TipoPrompt.ROLE_BASED;
         }
 
-        return "zero-shot";
+        return TipoPrompt.ZERO_SHOT;
     }
 
     public boolean esDelimitadores(String promptUsuario) {

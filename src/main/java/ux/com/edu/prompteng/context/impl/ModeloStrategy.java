@@ -23,8 +23,8 @@ public class ModeloStrategy implements InteligenciaArtificialStrategy {
 
     @Override
     public String generarRespuesta(PromptConfig config) {
-        // Switch expression (Java 17) — más compacto y funcional
-        String promptSeleccionado = switch (TipoPrompt.from(config.getTipoPrompt())) {
+        // Switch expression (Java 17) — directamente con TipoPrompt enum (type-safe)
+        String promptSeleccionado = switch (config.getTipoPrompt()) {
 
             case FEW_SHOT -> {
                 PromptBuilder builder = new PromptBuilder()
