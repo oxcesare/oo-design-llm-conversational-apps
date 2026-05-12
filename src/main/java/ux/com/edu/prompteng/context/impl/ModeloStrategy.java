@@ -2,7 +2,6 @@ package ux.com.edu.prompteng.context.impl;
 
 import ux.com.edu.prompteng.builders.PromptBuilder;
 import ux.com.edu.prompteng.builders.PromptConfig;
-import ux.com.edu.prompteng.builders.TipoPrompt;
 import ux.com.edu.prompteng.client.OllamaClient;
 import ux.com.edu.prompteng.strategies.InteligenciaArtificialStrategy;
 
@@ -23,7 +22,6 @@ public class ModeloStrategy implements InteligenciaArtificialStrategy {
 
     @Override
     public String generarRespuesta(PromptConfig config) {
-        // Switch expression (Java 17) — directamente con TipoPrompt enum (type-safe)
         String promptSeleccionado = switch (config.getTipoPrompt()) {
 
             case FEW_SHOT -> {
@@ -62,7 +60,6 @@ public class ModeloStrategy implements InteligenciaArtificialStrategy {
                     .conEntrada(config.getEntrada())
                     .buildConDelimitadores(config.getContratoSalida());
 
-            // ZERO_SHOT + default
             default -> new PromptBuilder()
                     .conRol(config.getRol())
                     .conInstrucciones(config.getInstrucciones())

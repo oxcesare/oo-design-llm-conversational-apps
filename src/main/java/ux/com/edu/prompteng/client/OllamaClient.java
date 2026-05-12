@@ -13,15 +13,13 @@ public class OllamaClient {
 
     private static final Logger log = LoggerFactory.getLogger(OllamaClient.class);
     private static final String URL_API = "http://localhost:11434/api/generate";
-
-    // HttpClient como campo estático (Java 17) — se crea una sola vez para toda la vida de la aplicación
     private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(10))
             .build();
 
     public String enviarPeticion(String modelo, String promptEstructurado) {
 
-        // Text block (Java 13+) para el JSON — más legible y sin escapes manuales de comillas
+
         String jsonBody = """
                 {"model": "%s", "prompt": "%s", "stream": false}
                 """.formatted(

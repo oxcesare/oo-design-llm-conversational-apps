@@ -43,20 +43,17 @@ public class Main {
             List<String[]> listaEjemplos = new ArrayList<>();
 
             if (router.esDelimitadores(promptUsuario)) {
-                // Prompt con etiquetas XML estructuradas
                 rolDetectado          = router.extraerRolDeDelimitadores(promptUsuario);
                 instruccionesMejoradas = router.extraerInstruccionesDeDelimitadores(promptUsuario);
                 loQuePidioElUsuario   = router.extraerConsultaDeDelimitadores(promptUsuario);
                 tipoPrompt            = TipoPrompt.DELIMITERS;
             } else if (router.esPromptEstructurado(promptUsuario)) {
-                // Prompt estructurado en texto libre
                 rolDetectado          = router.determinarRol(promptUsuario);
                 instruccionesMejoradas = router.optimizarInstrucciones(promptUsuario);
                 tipoPrompt            = router.determinarTipoPrompt(rolDetectado, instruccionesMejoradas);
                 loQuePidioElUsuario   = router.extraerConsultaFinal(promptUsuario);
                 listaEjemplos         = router.extraerEjemplosFewShot(promptUsuario);
             } else {
-                // Pregunta genérica sin estructura
                 rolDetectado          = ROL_POR_DEFECTO;
                 instruccionesMejoradas = promptUsuario;
                 tipoPrompt            = TipoPrompt.ZERO_SHOT;
@@ -71,7 +68,6 @@ public class Main {
                     listaEjemplos
             );
 
-            // Para el tipo delimiters, extraer y guardar el contrato de salida
             if (TipoPrompt.DELIMITERS == tipoPrompt) {
                 miPrompt.setContratoSalida(router.extraerContratoSalidaDeDelimitadores(promptUsuario));
             }
