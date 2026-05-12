@@ -12,36 +12,38 @@ import java.time.Duration;
 public class OllamaClient {
 
     private static final Logger log = LoggerFactory.getLogger(OllamaClient.class);
-
     private static final String URL_API = "http://localhost:11434/api/generate";
+
+    // HttpClient como campo estático (Java 17) — se crea una sola vez para toda la vida de la aplicación
+    private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(10))
+            .build();
 
     public String enviarPeticion(String modelo, String promptEstructurado) {
 
-        // Construcción del JSON manual para evitar dependencias externas iniciales
-        String jsonBody = String.format(
-                "{\"model\": \"%s\", \"prompt\": \"%s\", \"stream\": false}",
-                modelo, promptEstructurado.replace("\"", "\\\"").replace("\n", "\\n")
+        // Text block (Java 13+) para el JSON — más legible y sin escapes manuales de comillas
+        String jsonBody = """
+                {"model": "%s", "prompt": "%s", "stream": false}
+                """.formatted(
+                modelo,
+                promptEstructurado.replace("\"", "\\\"").replace("\n", "\\n")
         );
 
         try {
-            HttpClient client = HttpClient.newBuilder()
-                    .connectTimeout(Duration.ofSeconds(10))
-                    .build();
-
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(URL_API))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                     .build();
 
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            return response.body(); // Aquí recibes el JSON completo de Ollama
+            HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.body();
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             log.warn("La solicitud fue interrumpida: {}", e.getMessage());
         } catch (Exception e) {
+            log.error("Error al enviar petición a Ollama: {}", e.getMessage());
             return e.getMessage();
         }
         return null;

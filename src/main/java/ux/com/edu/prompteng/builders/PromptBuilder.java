@@ -55,18 +55,37 @@ public class PromptBuilder {
 
     // Método para Prompting con Delimitadores — construye el prompt usando las etiquetas XML definidas en PromptConstants
     public String buildConDelimitadores(String contratoSalida) {
-        return PromptConstants.OPEN_SYSTEM + "\n"
-                + "    " + PromptConstants.OPEN_ROLE + rol + PromptConstants.CLOSE_ROLE + "\n"
-                + "    " + PromptConstants.OPEN_TASK + "\n"
-                + "        " + instrucciones + "\n"
-                + "    " + PromptConstants.CLOSE_TASK + "\n"
-                + PromptConstants.CLOSE_SYSTEM + "\n\n"
-                + PromptConstants.OPEN_OUTPUT_CONTRACT + "\n"
-                + "    " + (contratoSalida == null || contratoSalida.isBlank() ? "" : contratoSalida) + "\n"
-                + PromptConstants.CLOSE_OUTPUT_CONTRACT + "\n\n"
-                + PromptConstants.OPEN_USER + "\n"
-                + "    " + entradaUsuario + "\n"
-                + PromptConstants.CLOSE_USER;
+        // Text block (Java 13+) — más legible y mantenible
+        String contrato = (contratoSalida == null || contratoSalida.isBlank()) ? "" : contratoSalida;
+        return """
+                %s
+                    %s%s%s
+                    %s
+                        %s
+                    %s
+                %s
+
+                %s
+                    %s
+                %s
+
+                %s
+                    %s
+                %s
+                """.formatted(
+                PromptConstants.OPEN_SYSTEM,
+                PromptConstants.OPEN_ROLE, rol, PromptConstants.CLOSE_ROLE,
+                PromptConstants.OPEN_TASK,
+                instrucciones,
+                PromptConstants.CLOSE_TASK,
+                PromptConstants.CLOSE_SYSTEM,
+                PromptConstants.OPEN_OUTPUT_CONTRACT,
+                contrato,
+                PromptConstants.CLOSE_OUTPUT_CONTRACT,
+                PromptConstants.OPEN_USER,
+                entradaUsuario,
+                PromptConstants.CLOSE_USER
+        );
     }
 
     //Metodo estático para Prompting con Delimitadores
