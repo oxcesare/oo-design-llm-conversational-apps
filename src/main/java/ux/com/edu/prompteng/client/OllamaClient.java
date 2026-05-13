@@ -12,7 +12,9 @@ import java.time.Duration;
 public class OllamaClient {
 
     private static final Logger log = LoggerFactory.getLogger(OllamaClient.class);
+
     private static final String URL_API = "http://localhost:11434/api/generate";
+
     private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(10))
             .build();

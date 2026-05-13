@@ -11,12 +11,15 @@ import ux.com.edu.prompteng.strategies.InteligenciaArtificialStrategy;
  */
 public class ModeloStrategy implements InteligenciaArtificialStrategy {
 
-    private final OllamaClient cliente = new OllamaClient();
+    private final OllamaClient cliente;
+
     private final String nombreModeloOllama;
+
     private final String nombreVisual;
 
-    public ModeloStrategy(String nombreModeloOllama, String nombreVisual) {
+    public ModeloStrategy(String nombreModeloOllama, String nombreVisual, OllamaClient client) {
         this.nombreModeloOllama = nombreModeloOllama;
+        this.cliente = client;
         this.nombreVisual = nombreVisual;
     }
 

@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ux.com.edu.prompteng.builders.PromptConfig;
 import ux.com.edu.prompteng.builders.TipoPrompt;
+import ux.com.edu.prompteng.client.OllamaClient;
 import ux.com.edu.prompteng.context.AgenteConversacional;
 import ux.com.edu.prompteng.context.impl.ModeloStrategy;
 import ux.com.edu.prompteng.intent.routing.IntentRouter;
@@ -73,13 +74,14 @@ public class Main {
             }
 
             log.info("Prompt Construido: {}", tipoPrompt);
-            //miAgente.interactuar(miPrompt);
+            miAgente.interactuar(miPrompt);
         } catch (Exception e) {
             log.error("Ocurrió un error al procesar la entrada: " + e.getMessage());
         }
     }
 
     private static InteligenciaArtificialStrategy seleccionarModelo(Scanner sc) {
+        OllamaClient cliente = new OllamaClient();
         while (true) {
             System.out.println("Selecciona el modelo LLM:");
             System.out.println("1) Llama3");
@@ -87,15 +89,16 @@ public class Main {
             System.out.println("3) Gemma2");
             String opcion = sc.nextLine().trim().toLowerCase();
 
+
             switch (opcion) {
                 case "1", "llama3" -> {
-                    return new ModeloStrategy("llama3", "Llama3-Local-M4");
+                    return new ModeloStrategy("llama3", "Llama3-Local-M4",cliente);
                 }
                 case "2", "mistral" -> {
-                    return new ModeloStrategy("mistral", "mistral");
+                    return new ModeloStrategy("mistral", "mistral",cliente);
                 }
                 case "3", "gemma2" -> {
-                    return new ModeloStrategy("gemma2:9b", "gemma2");
+                    return new ModeloStrategy("gemma2:9b", "gemma2",cliente);
                 }
                 default -> System.out.println("Opción inválida. Escribe 1, 2 o 3.");
             }
