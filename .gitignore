@@ -81,3 +81,9 @@ logs/
 ### OS Files ###
 .vscode/extensions/
 .vscode/settings.json
+
+# Other files for JavaDOC
+javadoc/
+/docs/
+/target/site/apidocs/
+/target

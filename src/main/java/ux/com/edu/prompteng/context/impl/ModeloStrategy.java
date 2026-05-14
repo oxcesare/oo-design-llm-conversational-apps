@@ -23,6 +23,12 @@ public class ModeloStrategy implements InteligenciaArtificialStrategy {
         this.nombreVisual = nombreVisual;
     }
 
+    /**
+     *
+     * @param config la configuración del prompt que contiene los parámetros
+     *               necesarios para construir y enviar la solicitud al modelo
+     * @return
+     */
     @Override
     public String generarRespuesta(PromptConfig config) {
         String promptSeleccionado = switch (config.getTipoPrompt()) {

@@ -36,6 +36,10 @@ public class PromptBuilder {
         return this;
     }
 
+    /**
+     *
+     * @return
+     */
     public String build() {
         StringBuilder sb = new StringBuilder();
         sb.append("<system>\n");
@@ -53,9 +57,13 @@ public class PromptBuilder {
         return sb.toString();
     }
 
-    // Método para Prompting con Delimitadores — construye el prompt usando las etiquetas XML definidas en PromptConstants
+    /**
+     * Método para Prompting con Delimitadores — construye el prompt
+     * usando las etiquetas XML definidas en PromptConstants
+     * @param contratoSalida
+     * @return
+     */
     public String buildConDelimitadores(String contratoSalida) {
-        // Text block (Java 13+) — más legible y mantenible
         String contrato = (contratoSalida == null || contratoSalida.isBlank()) ? "" : contratoSalida;
         return """
                 %s
@@ -88,7 +96,13 @@ public class PromptBuilder {
         );
     }
 
-    //Metodo estático para Prompting con Delimitadores
+    /**
+     * Metodo estático para Prompting con Delimitadores
+     * @param rol
+     * @param instrucciones
+     * @param entradaUsuario
+     * @return
+     */
     public static PromptBuilder promptConDelimitadores(String rol, String instrucciones, String entradaUsuario) {
         return new PromptBuilder()
                 .conRol(rol)
@@ -96,7 +110,13 @@ public class PromptBuilder {
                 .conEntrada(entradaUsuario);
     }
 
-    // Método para zero-shot (sin ejemplos)
+    /**
+     * Método para zero-shot (sin ejemplos)
+     * @param rol
+     * @param instrucciones
+     * @param entradaUsuario
+     * @return
+     */
     public static PromptBuilder zeroShot(String rol, String instrucciones, String entradaUsuario) {
         return new PromptBuilder()
                 .conRol(rol)
@@ -104,7 +124,14 @@ public class PromptBuilder {
                 .conEntrada(entradaUsuario);
     }
 
-    // Método para few-shot (con ejemplos)
+    /**
+     *  Método para few-shot (con ejemplos)
+     * @param rol
+     * @param instrucciones
+     * @param ejemplos
+     * @param entradaUsuario
+     * @return
+     */
     public static PromptBuilder fewShot(String rol, String instrucciones, List<String[]> ejemplos, String entradaUsuario) {
         PromptBuilder builder = new PromptBuilder()
                 .conRol(rol)
@@ -116,7 +143,13 @@ public class PromptBuilder {
         return builder;
     }
 
-    // Método para Chain-of-Thought (Pensamiento paso a paso)
+    /**
+     * Método para Chain-of-Thought (Pensamiento paso a paso)
+     * @param rol
+     * @param instrucciones
+     * @param entradaUsuario
+     * @return
+     */
     public static PromptBuilder chainOfThought(String rol, String instrucciones, String entradaUsuario) {
         String instruccionCoT = instrucciones + "\nAnaliza el problema paso a paso antes de dar la respuesta final.";
         return new PromptBuilder()
@@ -125,7 +158,11 @@ public class PromptBuilder {
                 .conEntrada(entradaUsuario);
     }
 
-    // Método para Meta-Prompting (Generador de Prompts)
+    /**
+     * Método para Meta-Prompting (Generador de Prompts)
+     * @param instruccionesParaCrearPrompt
+     * @return
+     */
     public static PromptBuilder metaPrompting(String instruccionesParaCrearPrompt) {
         return new PromptBuilder()
                 .conRol("Experto en Ingeniería de Prompts")
@@ -133,9 +170,14 @@ public class PromptBuilder {
                 .conEntrada(instruccionesParaCrearPrompt);
     }
 
-    // Método para Role-based Prompting (Persona)
+    /**
+     * Método para Role-based Prompting (Persona)
+     * @param rolEspecializado
+     * @param instrucciones
+     * @param entradaUsuario
+     * @return
+     */
     public static PromptBuilder roleBased(String rolEspecializado, String instrucciones, String entradaUsuario) {
-        // Aquí el 'rol' deja de ser un campo opcional y se convierte en el núcleo del comportamiento
         return new PromptBuilder()
                 .conRol(rolEspecializado)
                 .conInstrucciones("Como " + rolEspecializado + ", tu tarea es: " + instrucciones)
