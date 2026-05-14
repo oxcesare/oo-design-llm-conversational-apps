@@ -16,4 +16,9 @@ public class PromptConstants {
 
     public static final String OPEN_USER = "<user_query>";
     public static final String CLOSE_USER = "</user_query>";
+
+
+    private PromptConstants(){
+
+    }
 }

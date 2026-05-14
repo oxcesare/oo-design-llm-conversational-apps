@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 public class IntentRouter {
 
     private static final String ROL_POR_DEFECTO = "Asistente Virtual General";
+    private static final String RESPONDE_SIEMPRE="responde siempre con el siguiente formato";
     private static final Pattern PATRON_ROL_EXPLICITO = Pattern.compile(
             "(?i)(?:^|\\n)\\s*(?:eres\\s+una?|actua\\s+como|actúa\\s+como|asume\\s+el\\s+rol\\s+de)\\s+([^\\n.]+)"
     );
@@ -79,7 +80,7 @@ public class IntentRouter {
 
         String lower = instrucciones.toLowerCase();
 
-        if (lower.contains("formato exacto") || lower.contains("responde siempre con el siguiente formato")) {
+        if (lower.contains("formato exacto") || lower.contains(RESPONDE_SIEMPRE)) {
             return instrucciones + " (Respeta el formato de salida exactamente como se indica).";
         }
 
@@ -149,7 +150,7 @@ public class IntentRouter {
         // 4ª prioridad: few-shot — prompts estructurados con formato objetivo
         if (instruccionesLower.contains("ejemplo") ||
                 (instruccionesLower.contains("formato") && instruccionesLower.contains("consulta del usuario")) ||
-                instruccionesLower.contains("responde siempre con el siguiente formato") ||
+                instruccionesLower.contains(RESPONDE_SIEMPRE) ||
                 instruccionesLower.contains("muestra cómo") ||
                 instruccionesLower.contains("casos de uso") ||
                 instruccionesLower.contains("siguiendo este formato")) {
@@ -185,7 +186,7 @@ public class IntentRouter {
         return esDelimitadores(promptUsuario)
                 || esMetaPrompting(lower)
                 || lower.contains("consulta del usuario")
-                || lower.contains("responde siempre con el siguiente formato")
+                || lower.contains(RESPONDE_SIEMPRE)
                 || lower.contains("eres un")
                 || lower.contains("actúa como")
                 || lower.contains("actua como")
