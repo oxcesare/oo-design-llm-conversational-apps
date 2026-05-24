@@ -1,80 +1,42 @@
 package ux.com.edu.prompteng.context.impl;
 
-import ux.com.edu.prompteng.builders.PromptBuilder;
 import ux.com.edu.prompteng.builders.PromptConfig;
 import ux.com.edu.prompteng.client.OllamaClient;
 import ux.com.edu.prompteng.strategies.InteligenciaArtificialStrategy;
+import ux.com.edu.prompteng.strategies.prompt.PromptStrategyRegistry;
 
 /**
  * Estrategia parametrizable para reutilizar la misma logica de construccion
  * de prompts con distintos modelos de Ollama.
+ *
+ * <p>La construcción del prompt se delega a {@link PromptStrategyRegistry},
+ * eliminando el switch interno. Para añadir un nuevo tipo de prompt
+ * basta con registrarlo en el registry sin modificar esta clase.</p>
  */
 public class ModeloStrategy implements InteligenciaArtificialStrategy {
 
     private final OllamaClient cliente;
-
     private final String nombreModeloOllama;
-
     private final String nombreVisual;
+    private final PromptStrategyRegistry registry;
 
     public ModeloStrategy(String nombreModeloOllama, String nombreVisual, OllamaClient client) {
         this.nombreModeloOllama = nombreModeloOllama;
         this.cliente = client;
         this.nombreVisual = nombreVisual;
+        this.registry = new PromptStrategyRegistry();
     }
 
     /**
-     *
      * @param config la configuración del prompt que contiene los parámetros
      *               necesarios para construir y enviar la solicitud al modelo
-     * @return
+     * @return respuesta del modelo LLM
      */
     @Override
     public String generarRespuesta(PromptConfig config) {
-        String promptSeleccionado = switch (config.getTipoPrompt()) {
-
-            case FEW_SHOT -> {
-                PromptBuilder builder = new PromptBuilder()
-                        .conRol(config.getRol())
-                        .conInstrucciones(config.getInstrucciones());
-                if (config.getEjemplos() != null) {
-                    for (String[] ejemplo : config.getEjemplos()) {
-                        builder.agregarEjemplo(ejemplo[0], ejemplo[1]);
-                    }
-                }
-                yield builder.conEntrada(config.getEntrada()).build();
-            }
-
-            case CHAIN_OF_THOUGHT -> new PromptBuilder()
-                    .conRol(config.getRol())
-                    .conInstrucciones(config.getInstrucciones() + "\nAnaliza el problema paso a paso antes de dar la respuesta final.")
-                    .conEntrada(config.getEntrada())
-                    .build();
-
-            case META_PROMPTING -> new PromptBuilder()
-                    .conRol("Experto en Ingeniería de Prompts")
-                    .conInstrucciones("Tu tarea es diseñar un prompt profesional y optimizado basado en los requisitos del usuario.")
-                    .conEntrada(config.getInstrucciones())
-                    .build();
-
-            case ROLE_BASED -> new PromptBuilder()
-                    .conRol(config.getRol())
-                    .conInstrucciones(config.getInstrucciones())
-                    .conEntrada(config.getEntrada())
-                    .build();
-
-            case DELIMITERS -> new PromptBuilder()
-                    .conRol(config.getRol())
-                    .conInstrucciones(config.getInstrucciones())
-                    .conEntrada(config.getEntrada())
-                    .buildConDelimitadores(config.getContratoSalida());
-
-            default -> new PromptBuilder()
-                    .conRol(config.getRol())
-                    .conInstrucciones(config.getInstrucciones())
-                    .conEntrada(config.getEntrada())
-                    .build();
-        };
+        String promptSeleccionado = registry
+                .obtener(config.getTipoPrompt())
+                .buildPrompt(config);
 
         String jsonRespuesta = cliente.enviarPeticion(nombreModeloOllama, promptSeleccionado);
         return "Respuesta de " + nombreVisual + ": " + jsonRespuesta;
