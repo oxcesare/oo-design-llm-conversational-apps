@@ -15,12 +15,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+@SuppressWarnings("java:S106") // System.out se usa intencionalmente para la interacción con el usuario en consola
 public class Main {
 
 
     private static final Logger log = LoggerFactory.getLogger(Main.class);
 
     private static final String ROL_POR_DEFECTO = "Asistente Virtual General";
+
+    private static final String MISTRAL="mistral";
 
     public static void main(String[] args) {
 
@@ -76,7 +79,7 @@ public class Main {
             log.info("Prompt Construido: {}", tipoPrompt);
             miAgente.interactuar(miPrompt);
         } catch (Exception e) {
-            log.error("Ocurrió un error al procesar la entrada: " + e.getMessage());
+            log.error("Ocurrió un error al procesar la entrada: {}", e.getMessage());
         }
     }
 
@@ -94,8 +97,8 @@ public class Main {
                 case "1", "llama3" -> {
                     return new ModeloStrategy("llama3", "Llama3-Local-M4",cliente);
                 }
-                case "2", "mistral" -> {
-                    return new ModeloStrategy("mistral", "mistral",cliente);
+                case "2", MISTRAL -> {
+                    return new ModeloStrategy(MISTRAL, MISTRAL,cliente);
                 }
                 case "3", "gemma2" -> {
                     return new ModeloStrategy("gemma2:9b", "gemma2",cliente);

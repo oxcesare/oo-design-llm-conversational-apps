@@ -22,17 +22,18 @@ public class IntentRouter {
     private static final String ROL_POR_DEFECTO = "Asistente Virtual General";
     private static final String RESPONDE_SIEMPRE="responde siempre con el siguiente formato";
     private static final Pattern PATRON_ROL_EXPLICITO = Pattern.compile(
-            "(?i)(?:^|\\n)\\s*(?:eres\\s+una?|actua\\s+como|actúa\\s+como|asume\\s+el\\s+rol\\s+de)\\s+([^\\n.]+)"
+            "^\\s*(?:eres\\s+un[ao]?|actu[aá]\\s+como|asume\\s+el\\s+rol\\s+de)\\s+([^\\n.]+)",
+            Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.UNICODE_CASE
     );
-    private static final Pattern PATRON_CONSULTA = Pattern.compile("(?is)consulta\\s+del\\s+usuario\\s*:\\s*(.+)$");
+    private static final Pattern PATRON_CONSULTA = Pattern.compile("(?isu)consulta\\s+del\\s+usuario\\s*:\\s*(.+)$");
     private static final Pattern PATRON_EJEMPLOS = Pattern.compile(
-            "(?is)<ejemplo>\\s*entrada:\\s*(.+?)\\s*salida:\\s*(.+?)\\s*</ejemplo>"
+            "(?isu)<ejemplo>\\s*entrada:\\s*(.+?)\\s*salida:\\s*(.+?)\\s*</ejemplo>"
     );
     // Patrones para extraer campos de prompts con delimitadores XML
-    private static final Pattern PATRON_TAG_ROLE      = Pattern.compile("(?is)<role>(.*?)</role>");
-    private static final Pattern PATRON_TAG_TASK      = Pattern.compile("(?is)<task_description>(.*?)</task_description>");
-    private static final Pattern PATRON_TAG_OUTPUT    = Pattern.compile("(?is)<output_contract>(.*?)</output_contract>");
-    private static final Pattern PATRON_TAG_USER      = Pattern.compile("(?is)<user_query>(.*?)</user_query>");
+    private static final Pattern PATRON_TAG_ROLE      = Pattern.compile("(?isu)<role>(.*?)</role>");
+    private static final Pattern PATRON_TAG_TASK      = Pattern.compile("(?isu)<task_description>(.*?)</task_description>");
+    private static final Pattern PATRON_TAG_OUTPUT    = Pattern.compile("(?isu)<output_contract>(.*?)</output_contract>");
+    private static final Pattern PATRON_TAG_USER      = Pattern.compile("(?isu)<user_query>(.*?)</user_query>");
 
     /**
      * Analiza las instrucciones del usuario y determina el rol más adecuado
