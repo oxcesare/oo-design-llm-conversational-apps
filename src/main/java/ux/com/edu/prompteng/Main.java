@@ -1,6 +1,5 @@
 package ux.com.edu.prompteng;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ux.com.edu.prompteng.builders.PromptConfig;
@@ -15,15 +14,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-@SuppressWarnings("java:S106") // System.out se usa intencionalmente para la interacción con el usuario en consola
+@SuppressWarnings("java:S106") // System.out se usa intencionalmente para la interacción con el usuario en
+                               // consola
 public class Main {
-
 
     private static final Logger log = LoggerFactory.getLogger(Main.class);
 
     private static final String ROL_POR_DEFECTO = "Asistente Virtual General";
 
-    private static final String MISTRAL="mistral";
+    private static final String MISTRAL = "mistral";
 
     public static void main(String[] args) {
 
@@ -47,21 +46,21 @@ public class Main {
             List<String[]> listaEjemplos = new ArrayList<>();
 
             if (router.esDelimitadores(promptUsuario)) {
-                rolDetectado          = router.extraerRolDeDelimitadores(promptUsuario);
+                rolDetectado = router.extraerRolDeDelimitadores(promptUsuario);
                 instruccionesMejoradas = router.extraerInstruccionesDeDelimitadores(promptUsuario);
-                loQuePidioElUsuario   = router.extraerConsultaDeDelimitadores(promptUsuario);
-                tipoPrompt            = TipoPrompt.DELIMITERS;
+                loQuePidioElUsuario = router.extraerConsultaDeDelimitadores(promptUsuario);
+                tipoPrompt = TipoPrompt.DELIMITERS;
             } else if (router.esPromptEstructurado(promptUsuario)) {
-                rolDetectado          = router.determinarRol(promptUsuario);
+                rolDetectado = router.determinarRol(promptUsuario);
                 instruccionesMejoradas = router.optimizarInstrucciones(promptUsuario);
-                tipoPrompt            = router.determinarTipoPrompt(rolDetectado, instruccionesMejoradas);
-                loQuePidioElUsuario   = router.extraerConsultaFinal(promptUsuario);
-                listaEjemplos         = router.extraerEjemplosFewShot(promptUsuario);
+                tipoPrompt = router.determinarTipoPrompt(rolDetectado, instruccionesMejoradas);
+                loQuePidioElUsuario = router.extraerConsultaFinal(promptUsuario);
+                listaEjemplos = router.extraerEjemplosFewShot(promptUsuario);
             } else {
-                rolDetectado          = ROL_POR_DEFECTO;
+                rolDetectado = ROL_POR_DEFECTO;
                 instruccionesMejoradas = promptUsuario;
-                tipoPrompt            = TipoPrompt.ZERO_SHOT;
-                loQuePidioElUsuario   = promptUsuario;
+                tipoPrompt = TipoPrompt.ZERO_SHOT;
+                loQuePidioElUsuario = promptUsuario;
             }
 
             PromptConfig miPrompt = new PromptConfig(
@@ -69,8 +68,7 @@ public class Main {
                     instruccionesMejoradas,
                     loQuePidioElUsuario,
                     tipoPrompt,
-                    listaEjemplos
-            );
+                    listaEjemplos);
 
             if (TipoPrompt.DELIMITERS == tipoPrompt) {
                 miPrompt.setContratoSalida(router.extraerContratoSalidaDeDelimitadores(promptUsuario));
@@ -83,6 +81,11 @@ public class Main {
         }
     }
 
+    /**
+     * 
+     * @param sc
+     * @return
+     */
     private static InteligenciaArtificialStrategy seleccionarModelo(Scanner sc) {
         OllamaClient cliente = new OllamaClient();
         while (true) {
@@ -92,22 +95,27 @@ public class Main {
             System.out.println("3) Gemma2");
             String opcion = sc.nextLine().trim().toLowerCase();
 
-
             switch (opcion) {
                 case "1", "llama3" -> {
-                    return new ModeloStrategy("llama3", "Llama3-Local-M4",cliente);
+                    return new ModeloStrategy("llama3", "Llama3-Local-M4", cliente);
                 }
                 case "2", MISTRAL -> {
-                    return new ModeloStrategy(MISTRAL, MISTRAL,cliente);
+                    return new ModeloStrategy(MISTRAL, MISTRAL, cliente);
                 }
                 case "3", "gemma2" -> {
-                    return new ModeloStrategy("gemma2:9b", "gemma2",cliente);
+                    return new ModeloStrategy("gemma2:9b", "gemma2", cliente);
                 }
                 default -> System.out.println("Opción inválida. Escribe 1, 2 o 3.");
             }
         }
     }
 
+    /**
+     * Lee el prompt del usuario
+     * 
+     * @param sc Scanner para leer el prompt
+     * @return Prompt ingresado por el usuario
+     */
     private static String leerPrompt(Scanner sc) {
         System.out.println("Ingresa tu prompt (si es multilinea, termina con una línea que diga FIN):");
         StringBuilder sb = new StringBuilder();
